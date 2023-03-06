@@ -400,7 +400,10 @@ public class Hotel {
 
 // Rest of the functions definition go in here
 
-   public static void viewHotels(Hotel esql) {}
+   public static void viewHotels(Hotel esql) {
+
+
+   }//end
    public static void viewRooms(Hotel esql) {}
    public static void bookRooms(Hotel esql) {}
    public static void viewRecentBookingsfromCustomer(Hotel esql) {}
