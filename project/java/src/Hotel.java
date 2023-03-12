@@ -24,6 +24,10 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 import java.lang.Math;
+import java.text.DateFormat;  
+import java.text.SimpleDateFormat;  
+import java.util.Date;  
+import java.util.Calendar;  
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -268,11 +272,13 @@ public class Hotel {
             System.out.println("---------");
             System.out.println("1. Create user");
             System.out.println("2. Log in");
+            System.out.println("3. View Room");
             System.out.println("9. < EXIT");
             String authorisedUser = null;
             switch (readChoice()){
                case 1: CreateUser(esql); break;
                case 2: authorisedUser = LogIn(esql); break;
+               case 3: viewRooms(esql); break;
                case 9: keepon = false; break;
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
@@ -404,10 +410,31 @@ public class Hotel {
 
 
    }//end
-   public static void viewRooms(Hotel esql) {}
+   public static void viewRooms(Hotel esql) {
+      try{
+         System.out.print("\tEnter Hotel ID: ");
+         Integer hotelID = Integer.parseInt(in.readLine());
+         System.out.print("\tEnter Date (MM/DD/YYYY): ");
+         SimpleDateFormat dateFormat = new SimpleDateFormat("mm/dd/yyyy");
+         Date dob = dateFormat.parse(in.readLine());
+         String strDate = dateFormat.format(dob);
+         
+         /*
+            Unsure if correct:
+            
+         */
+         String query = String.format("SELECT r.roomNumber, r.price FROM Rooms as r, RoomBookings as b WHERE r.hotelID = '%d' AND r.hotelID = b.hotelID AND b.bookingDate = '%s'", hotelID, strDate);         
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   } //end
    public static void bookRooms(Hotel esql) {}
    public static void viewRecentBookingsfromCustomer(Hotel esql) {}
    public static void updateRoomInfo(Hotel esql) {}
+
    public static void viewRecentUpdates(Hotel esql) {}
    public static void viewBookingHistoryofHotel(Hotel esql) {}
    public static void viewRegularCustomers(Hotel esql) {}

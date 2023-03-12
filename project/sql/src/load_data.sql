@@ -1,5 +1,5 @@
 COPY Users
-FROM '/extra/achau020/Phase3_Project/project/data/bookings.csv' 
+FROM '/extra/achau020/Phase3_Project/project/data/users.csv' 
 WITH DELIMITER ',' CSV HEADER;
 ALTER SEQUENCE users_userID_seq RESTART 101; 
 
