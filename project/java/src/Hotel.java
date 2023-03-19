@@ -23,7 +23,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
-import java.lang.Math;
+import java.lang.*;
 import java.text.DateFormat;  
 import java.text.SimpleDateFormat;  
 import java.util.Date;  
@@ -272,7 +272,6 @@ public class Hotel {
             System.out.println("---------");
             System.out.println("1. Create user");
             System.out.println("2. Log in");
-            System.out.println("3. View Room");
             System.out.println("9. < EXIT");
             String authorisedUser = null;
             switch (readChoice()){
@@ -431,15 +430,213 @@ public class Hotel {
          System.err.println (e.getMessage());
       }
    } //end
-   public static void bookRooms(Hotel esql) {}
-   public static void viewRecentBookingsfromCustomer(Hotel esql) {}
+   public static void bookRooms(Hotel esql) {
+      try{
+         System.out.print("\tEnter Hotel ID: ");
+         Integer hotelID = Integer.parseInt(in.readLine());
+
+         System.out.print("\tEnter Room Number ");
+         Integer room_Number = Integer.parseInt(in.readLine());
+
+         System.out.print("\tEnter Date (MM/DD/YYYY): ");
+         SimpleDateFormat dateFormat = new SimpleDateFormat("mm/dd/yyyy");
+         SimpleDateFormat oldDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+
+         Date dob = dateFormat.parse(in.readLine());
+         String strDate = dateFormat.format(dob);
+         
+         /*
+            Unsure if correct:
+            
+         */
+         //String testQuery = String.format("SELECT b1.bookingDate FROM RoomBookings as b1 WHERE b1.roomNumber = '%d' AND b1.hotelID = '%d'", room_Number, hotelID);
+         //String newTest = testQuery;
+         //String query = dateFormat.format(oldDateFormat.parse(newTest));
+
+         //String query = String.format("SELECT roomNumber FROM RoomBookings WHERE bookingDate != '%s'", strDate);
+         //String query = String.format("SELECT b1.bookingID from RoomBookings as b1 WHERE b1.bookingDate IN ( SELECT b.bookingDate FROM RoomBookings as b WHERE b.hotelID = '%d' and b.roomNumber = '%d' )", hotelID, room_Number);         
+
+         //String query = String.format("SELECT DISTINCT r.price FROM Rooms as r, RoomBookings as b3 WHERE b3.bookingDate NOT IN ( SELECT b1.bookingDate FROM RoomBookings as b1 WHERE b1.hotelID = '%d' AND b1.roomNumber = '%d' AND r.hotelID = '%d' AND r.roomNumber = '%d')", strDate, hotelID, room_Number, hotelID, room_Number, strDate); 
+
+         String query = String.format("SELECT DISTINCT b.bookingID, r.price FROM Rooms as r, RoomBookings as b WHERE b.bookingDate = '%s' AND b.hotelID = '%d' AND b.roomNumber = '%d' AND r.hotelID = b.hotelID AND r.roomNumber = b.roomNumber", strDate, hotelID, room_Number);
+
+         //WHERE b1.roomNumber = r.roomNumber AND b1.hotelID = r.hotelID
+         //String query = String.format("SELECT DISTINCT r.price FROM Rooms as r, RoomBookings as b3 WHERE r.hotelID = '%d' AND r.roomNumber = '%d' AND b3.bookingDate NOT IN ( SELECT DISTINCT b1.bookingDate FROM RoomBookings as b1 WHERE b1.roomNumber = r.roomNumber AND b1.hotelID = r.hotelID )", hotelID, room_Number, strDate); 
+
+         //String query = String.format("SELECT DISTINCT r.price FROM Rooms as r, RoomBookings as b3 WHERE r.hotelID = '%d' AND r.roomNumber = '%d' AND b3.bookingDate NOT IN ( SELECT DISTINCT b.bookingDate FROM Roombookings as b WHERE NOT EXISTS ( SELECT DISTINCT b1.bookingDate FROM RoomBookings as b1 WHERE b1.roomNumber = r.roomNumber AND b1.hotelID = r.hotelID ))", hotelID, room_Number, strDate); 
+                       
+
+         //String query = String.format("SELECT bookingDate FROM RoomBookings");
+
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println ("room book");
+         System.err.println (e.getMessage());
+      }
+   }
+
+
+   public static void viewRecentBookingsfromCustomer(Hotel esql) {
+      /*
+      Need User id to make sure that it is a user not manager
+      User id would be use to make sure it can not see other user
+      See up to 5 last books made
+      Get hotelID, room number, billing information, and date of booking
+      {} = means not sure if needed
+
+      EDIT: This needs to optimize where it should not ask for the 
+      login information again.
+
+      select b.hotelID, b.roomNumber, r.price, b.bookingDate
+      from rooms r, roomBooking b
+      where {[esql.user] = 'Customer' / esql.getNewUserID("SELECT last_value FROM users_userID_seq"}
+      b.hotelID = r.hotelID, b.roomNumber = r.roomNumber 
+      limit 5;
+
+      */
+      try{
+         
+
+         String userValue = LogIn(esql);
+
+         String query = String.format("SELECT b.hotelID, b.roomNumber, r.price, b.bookingDate FROM Rooms as r, RoomBookings as b WHERE b.hotelID = r.hotelID AND b.roomNumber = r.roomNumber AND b.customerID = '%s' ORDER BY b.* DESC LIMIT 5", userValue);         
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+         //System.out.println("\nID" + esql.login(esql) + "\n");
+
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+      
+   }
    public static void updateRoomInfo(Hotel esql) {}
 
-   public static void viewRecentUpdates(Hotel esql) {}
-   public static void viewBookingHistoryofHotel(Hotel esql) {}
-   public static void viewRegularCustomers(Hotel esql) {}
-   public static void placeRoomRepairRequests(Hotel esql) {}
-   public static void viewRoomRepairHistory(Hotel esql) {}
+   public static void viewRecentUpdates(Hotel esql) {
+      System.out.print("\tQuestion 6");
+   }
+
+   public static void viewBookingHistoryofHotel(Hotel esql) {
+      /*
+         Get bookingID, customer Name, hotelID, room number,
+            date of booking for each booking
+
+         Option to input range of date and show all booking in that range
+
+         SELECT b.bookingID, u.name, b.hotelID, b.roomNumber
+         FROM RoomBookings as b, Users as u
+         Where (From_date BETWEEN ['x'] AND ['y'])
+      */
+      boolean dateResult = false;
+      try{
+         
+         String firstDate = null;
+         String secondDate = null;
+         boolean sameDate = false;
+         String query = "";
+         String yesCheck = "Yes";
+         String yCheck = "Y";
+         String noCheck = "No";
+         String nCheck = "N";
+         System.out.print("Do you want to enter date ranges?\n Enter Yes or No: ");
+         String dateCheck = in.readLine();
+
+         /*
+            Error printing with equalsIgnoreCase:
+            Needs to print out error message if I do not get yes or no
+               such as poop
+            Add condition for Y and not just yes
+
+            EDIT: Need to check if it is the hotel that the manager manage
+
+         */
+
+         if(yesCheck.equalsIgnoreCase(dateCheck) || yCheck.equalsIgnoreCase(dateCheck)) {
+            dateResult = true;
+         } else if (noCheck.equalsIgnoreCase(dateCheck) || nCheck.equalsIgnoreCase(dateCheck)) {
+            dateResult = false;
+            System.out.print("Exit\n");
+         } else {
+            System.out.print("There is an error with date input\n");
+         }
+
+
+         if(dateResult == true) {
+
+            System.out.print("\tEnter Begin Date (MM/DD/YYYY): ");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("mm/dd/yyyy");
+            Date startDob = dateFormat.parse(in.readLine());
+            firstDate = dateFormat.format(startDob);
+
+            System.out.print("\tEnter End Date (MM/DD/YYYY): ");
+            Date lastDob = dateFormat.parse(in.readLine());
+            secondDate = dateFormat.format(lastDob);
+
+            //Error checking
+            if(firstDate.compareTo(secondDate) > 0) {
+               System.out.println("Last Date cannot be before the first date");
+            }
+         }
+
+         if(firstDate.compareTo(secondDate) == 0) {
+            sameDate = true;
+         }
+
+         if(sameDate == false) {
+            query = String.format("SELECT b.bookingID, u.name, b.hotelID, b.roomNumber, b.bookingDate FROM RoomBookings as b, Users as u WHERE b.customerID = u.userID AND (b.bookingDate BETWEEN '%s' AND '%s')", firstDate, secondDate);         
+         } else {
+            query = String.format("SELECT b.bookingID, u.name, b.hotelID, b.roomNumber, b.bookingDate FROM RoomBookings as b, Users as u WHERE b.customerID = u.userID AND b.bookingDate = '%s'", firstDate);         
+         }
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+
+      }catch(Exception e){
+         if(dateResult == false) {
+            System.out.print("");
+         } else {
+            //To avoid printing out error message for equalsIgnoreCase
+            System.err.println (e.getMessage() + "!");
+         }
+      }
+
+   }
+   public static void viewRegularCustomers(Hotel esql) {
+      try{
+         System.out.print("\tEnter Hotel ID: ");
+         Integer hotelID = Integer.parseInt(in.readLine());
+
+         String query = String.format("SELECT u.name, COUNT(u.name) FROM Users as u, RoomBookings as b WHERE b.customerID = u.userID AND b.hotelID = '%s' GROUP BY u.name ORDER BY COUNT(u.name) DESC", hotelID);         
+
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+   public static void placeRoomRepairRequests(Hotel esql) {
+
+   }
+   public static void viewRoomRepairHistory(Hotel esql) {
+      try{
+         
+         System.out.print("\tEnter Hotel ID: ");
+         Integer hotelID = Integer.parseInt(in.readLine());
+
+         String query = String.format("SELECT u.name, COUNT(u.name) FROM Users as u, RoomBookings as b WHERE b.customerID = u.userID AND b.hotelID = '%s' GROUP BY u.name ORDER BY COUNT(u.name) DESC", hotelID);         
+
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
 
 }//end Hotel
 

@@ -1,0 +1,28 @@
+SELECT r.price 
+FROM Rooms as r
+WHERE r.hotelID = '%d' AND r.roomNumber = '%d' AND b3.bookingDate NOT IN 
+(
+    SELECT b.bookingDate 
+    FROM Roombookings as b
+    WHERE NOT EXISTS 
+    (
+        SELECT b1.bookingDate
+        FROM RoomBookings as b1
+        WHERE b1.roomNumber = r.roomNumber AND b1.hotelID = r.hotelID
+    )
+);         
+
+SELECT DISTINCT r.price 
+FROM Rooms as r, RoomBookings as b3 
+WHERE b3.bookingDate NOT IN 
+    ( 
+        SELECT b1.bookingDate 
+        FROM RoomBookings as b1 
+        WHERE b1.hotelID = '%d' AND b1.roomNumber = '%d' 
+            AND r.hotelID = '%d' AND r.roomNumber = '%d'
+    ) 
+
+SELECT r.companyID, r.hotelID, r.roomNumber, r.repairDate
+FROM RoomRepairs as r
+WHERE r.hotelID = '%d'
+
