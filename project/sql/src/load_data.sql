@@ -1,5 +1,6 @@
+
 COPY Users
-FROM '/extra/emira035/cs166_project/project/data/users.csv' 
+FROM '/extra/emira035/cs166_project/project/data/users.csv'
 WITH DELIMITER ',' CSV HEADER;
 ALTER SEQUENCE users_userID_seq RESTART 101; 
 

@@ -10,7 +10,7 @@
  *
  */
 
-
+import java.io*;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -266,7 +266,7 @@ public class Hotel {
             // These are sample SQL statements
             System.out.println("MAIN MENU");
             System.out.println("---------");
-            System.out.println("1. Create user");
+            System.out.println("1. New User Registration!");
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
             String authorisedUser = null;
@@ -276,9 +276,11 @@ public class Hotel {
                case 9: keepon = false; break;
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
+
             if (authorisedUser != null) {
               boolean usermenu = true;
               while(usermenu) {
+
                 System.out.println("MAIN MENU");
                 System.out.println("---------");
                 System.out.println("1. View Hotels within 30 units");
@@ -311,6 +313,11 @@ public class Hotel {
                    default : System.out.println("Unrecognized choice!"); break;
                 }
               }
+
+
+
+
+
             }
          }//end while
       }catch(Exception e) {
@@ -360,19 +367,7 @@ public class Hotel {
     * Creates a new user
     **/
    public static void CreateUser(Hotel esql){
-      try{
-         System.out.print("\tEnter name: ");
-         String name = in.readLine();
-         System.out.print("\tEnter password: ");
-         String password = in.readLine(); 
-         String type="Customer";
-			String query = String.format("INSERT INTO USERS (name, password, userType) VALUES ('%s','%s', '%s')", name, password, type);
-         esql.executeUpdate(query);
-         System.out.println ("User successfully created with userID = " + esql.getNewUserID("SELECT last_value FROM users_userID_seq"));
-         
-      }catch(Exception e){
-         System.err.println (e.getMessage ());
-      }
+     
    }//end CreateUser
 
 
@@ -381,21 +376,20 @@ public class Hotel {
     * @return User login or null is the user does not exist
     **/
    public static String LogIn(Hotel esql){
-      try{
-         System.out.print("\tEnter userID: ");
-         String userID = in.readLine();
-         System.out.print("\tEnter password: ");
-         String password = in.readLine();
+      
+      String usernameInput;
+      String passwordInput;
+      Console cnsl;
+      System.out.println("Please enter your username and password. \n \n");
 
-         String query = String.format("SELECT * FROM USERS WHERE userID = '%s' AND password = '%s'", userID, password);
-         int userNum = esql.executeQuery(query);
-         if (userNum > 0)
-            return userID;
-         return null;
-      }catch(Exception e){
-         System.err.println (e.getMessage ());
-         return null;
-      }
+      System.out.print("USERNAME: ");
+       usernameInput = in.readLine();
+
+      //System.out.print("Password: ");
+      
+      char [] ch =cnsl.readPassword("Password: ");
+     
+      return s;
    }//end
 
 // Rest of the functions definition go in here
@@ -410,6 +404,10 @@ public class Hotel {
    public static void viewRegularCustomers(Hotel esql) {}
    public static void placeRoomRepairRequests(Hotel esql) {}
    public static void viewRoomRepairHistory(Hotel esql) {}
+
+   public static void TestFunction(Hotel esql){
+
+   }
 
 }//end Hotel
 
