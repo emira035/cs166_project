@@ -9,7 +9,6 @@
  * Target DBMS: 'Postgres'
  *
  */
-
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -32,10 +31,60 @@ import java.lang.Math;
 
 
 
-
 public class Hotel {
 
+
+
+public class AuthorizedUser{
+   private int userId;
+   private String username;
+   private String usertype;
+   private boolean _authenticated;
+
+   public AuthorizedUser(){
+      _authenticated = false;
+   }
+
+   public boolean isAuthenticated(){
+      return _authenticated;
+   }
+
+   public int getUserID(){
+      return userId;
+   }
+
+   public String getUserName(){
+      return username;
+   }
+   public String getUserType(){
+      return usertype;
+   }
+   public void SetInfo(int id,String user,String utype){
+      username = user;
+      userId = id;
+      usertype = utype;
+      _authenticated = true;
+   }
+    /* bs method i have to implemented because its a static class that i cant pass around varibles*/
+   public void UnAuthenticate(){
+       _authenticated = false;
+   }
+
+   public boolean HasElevatedRights(){
+
+       if(usertype.equals("admin")|| usertype.equals("manager")){
+         return true;
+       }
+       return false;
+   }
+   
+}
+
+
+
    // reference to physical database connection.
+
+   private static AuthorizedUser authenticatedUser=null;
    private Connection _connection = null;
 
    // handling the keyboard inputs through a BufferedReader
@@ -52,9 +101,13 @@ public class Hotel {
     * @param password the user login password
     * @throws java.sql.SQLException when failed to make a connection.
     */
+
+
    public Hotel(String dbname, String dbport, String user, String passwd) throws SQLException {
 
       System.out.print("Connecting to database...");
+      authenticatedUser = new AuthorizedUser();
+      
       try{
          // constructs the connection URL
          String url = "jdbc:postgresql://localhost:" + dbport + "/" + dbname;
@@ -243,6 +296,7 @@ public class Hotel {
     * @param args the command line arguments this inclues the <mysql|pgsql> <login file>
     */
    public static void main (String[] args) {
+       
       if (args.length != 3) {
          System.err.println (
             "Usage: " +
@@ -267,61 +321,47 @@ public class Hotel {
          boolean keepon = true;
          while(keepon) {
             // These are sample SQL statements
+           // System.out.print("\033\143"); // clears console
             System.out.println("MAIN MENU");
             System.out.println("---------");
-            System.out.println("1. New User Registration");
+            System.out.println("1. New User Registration!");
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
-            AuthorizedUser authorisedUser = null;
+
             switch (readChoice()){
-               case 1: CreateUser(esql); break;
-               case 2: authorisedUser = LogIn(esql); break;
+               case 1: CreateNewCustomer(esql); break;
+               case 2:  Login(esql);
+
+                if (authenticatedUser.isAuthenticated()) {
+              boolean usermenu = true;
+              while(usermenu) {
+
+               if(!authenticatedUser.HasElevatedRights()){
+                   usermenu =ShowCustomerMode(esql,usermenu);
+               }
+               else{
+                  usermenu = ShowManagerMode(esql,usermenu);
+               }
+
+              }
+            }
+            else
+            {
+               //System.out.print("\033\143"); // clears console
+               System.out.println("\n -- Invalid Username and/or password. --\n");
+               System.out.println("Returning to Menu, press Enter to continue...");
+               System.in.read();
+            }
+            break;
+
+
                case 9: keepon = false; break;
                default : System.out.println("Unrecognized choice!"); break;
             }//end switch
 
-            if (authorisedUser != null) {
-              boolean usermenu = true;
-              while(usermenu) {
-
-                System.out.println("MAIN MENU");
-                System.out.println("---------");
-                System.out.println("1. View Hotels within 30 units");
-                System.out.println("2. View Rooms");
-                System.out.println("3. Book a Room");
-                System.out.println("4. View recent booking history");
-
-                //the following functionalities basically used by managers
-                System.out.println("5. Update Room Information");
-                System.out.println("6. View 5 recent Room Updates Info");
-                System.out.println("7. View booking history of the hotel");
-                System.out.println("8. View 5 regular Customers");
-                System.out.println("9. Place room repair Request to a company");
-                System.out.println("10. View room repair Requests history");
-
-                System.out.println(".........................");
-                System.out.println("20. Log out");
-                switch (readChoice()){
-                   case 1: viewHotels(esql); break;
-                   case 2: viewRooms(esql); break;
-                   case 3: bookRooms(esql); break;
-                   case 4: viewRecentBookingsfromCustomer(esql); break;
-                   case 5: updateRoomInfo(esql); break;
-                   case 6: viewRecentUpdates(esql); break;
-                   case 7: viewBookingHistoryofHotel(esql); break;
-                   case 8: viewRegularCustomers(esql); break;
-                   case 9: placeRoomRepairRequests(esql); break;
-                   case 10: viewRoomRepairHistory(esql); break;
-                   case 20: usermenu = false; break;
-                   default : System.out.println("Unrecognized choice!"); break;
-                }
-              }
+           
 
 
-
-
-
-            }
          }//end while
       }catch(Exception e) {
          System.err.println (e.getMessage ());
@@ -346,6 +386,73 @@ public class Hotel {
          "*******************************************************\n");
    }//end Greeting
 
+
+   public static boolean ShowManagerMode(Hotel esql, boolean usermenu){
+      System.out.println("MAIN MENU");
+      System.out.println("---------");
+      System.out.println("1. View Hotels within 30 units");
+      System.out.println("2. View Rooms");
+      System.out.println("3. Book a Room");
+      System.out.println("4. View recent booking history");
+      
+       //the following functionalities basically used by managers
+      System.out.println("5. Update Room Information");
+      System.out.println("6. View 5 recent Room Updates Info");
+      System.out.println("7. View booking history of the hotel");
+      System.out.println("8. View 5 regular Customers");
+      System.out.println("9. Place room repair Request to a company");
+      System.out.println("10. View room repair Requests history");
+      System.out.println(".........................");
+      System.out.println("20. Log out");
+
+      switch (readChoice()){
+                   case 1: viewHotels(esql); break;
+                   case 2: viewRooms(esql); break;
+                   case 3: bookRooms(esql); break;
+                   case 4: viewRecentBookingsfromCustomer(esql); break;
+                   case 5: updateRoomInfo(esql); break;
+                   case 6: viewRecentUpdates(esql); break;
+                   case 7: viewBookingHistoryofHotel(esql); break;
+                   case 8: viewRegularCustomers(esql); break;
+                   case 9: placeRoomRepairRequests(esql); break;
+                   case 10: viewRoomRepairHistory(esql); break;
+                   case 20: 
+                     authenticatedUser.UnAuthenticate();
+                     usermenu = false; 
+                     break;
+                   default : System.out.println("Unrecognized choice!"); break;
+                }
+         return usermenu;
+
+
+   }
+
+   public static boolean ShowCustomerMode(Hotel esql,boolean usermenu){
+
+      System.out.println("MAIN MENU");
+      System.out.println("---------");
+      System.out.println("1. View Hotels within 30 units");
+      System.out.println("2. View Rooms");
+      System.out.println("3. Book a Room");
+      System.out.println("4. View recent booking history");
+      System.out.println(".........................");
+      System.out.println("20. Log out");
+
+      switch (readChoice()){
+                   case 1: viewHotels(esql); break;
+                   case 2: viewRooms(esql); break;
+                   case 3: bookRooms(esql); break;
+                   case 4: viewRecentBookingsfromCustomer(esql); break;
+                   case 5: updateRoomInfo(esql); break;
+                   case 20: 
+                     authenticatedUser.UnAuthenticate();
+                     usermenu = false; 
+                     break;
+                   default : System.out.println("Unrecognized choice!"); break;
+                }
+                return usermenu;
+   }
+
    /*
     * Reads the users choice given from the keyboard
     * @int
@@ -369,57 +476,123 @@ public class Hotel {
    /*
     * Creates a new user
     **/
-   public static void CreateUser(Hotel esql){
-     
-   }//end CreateUser
 
+   public static void CreateNewCustomer(Hotel esql){
+     
+      String usernameInput;
+      String passwordInput;
+      String passwordInput2;
+      boolean nosspaces = false;
+      boolean iscorrectsize = false;
+      boolean matchingpass= false;
+
+      System.out.println("   New User Registration ");
+      System.out.println("---------------------------------------- \n");
+      System.out.println("Please enter the following information. \n");
+      System.out.println(" - Password length must be greater than 5-20 characters \n");
+      System.out.println(" - Password must not contain any spaces\n");
+      System.out.println("---------------------------------------- \n");
+
+      try{
+      System.out.print("Username: ");
+      usernameInput = in.readLine();
+
+ 
+      char[] inputs = System.console().readPassword("Password: ");
+      passwordInput = String.valueOf(inputs);
+
+      char[] inputs2 = System.console().readPassword("Confirm Password: ");
+      passwordInput2 = String.valueOf(inputs2);
+
+      if(!passwordInput2.equals(passwordInput)){
+           System.out.println("\n- 'Password' and 'Confirm Password' are not same! -");
+           matchingpass = false;
+      }
+
+       if(passwordInput.contains(" ")){
+           System.out.println("\n- Password must not contain Spaces! -");
+           nosspaces =  false;
+      }
+
+
+      if((passwordInput.length()<=5) || (passwordInput.length() >20)){
+           System.out.println("\n- Password must be between 5 and 20 characters!  -");
+          iscorrectsize = false;
+      }
+
+       boolean validpass = matchingpass&&nosspaces&&iscorrectsize;
+
+
+
+      }
+
+      catch(Exception e){
+         System.out.println("SOMETHING IS WRONG!");
+      }
+   }//end CreateUser
 
    /*
     * Check log in credentials for an existing user
     * @return User login or null is the user does not exist
     **/
-   public static AuthorizedUser LogIn(Hotel esql){
+   public static void Login(Hotel esql){
       
-      String usernameInput"";
+      String usernameInput="";
       String passwordInput="";
-      AuthorizedUser authenticatedUser = null;
 
-      System.out.println("Please enter your username and password. \n \n");
+      authenticatedUser.UnAuthenticate(); 
+     
+
+
+      //System.out.print("\033\143"); //clear console
+      System.out.println("   USER LOGIN  ");
+      System.out.println("---------------------------------------- \n");
+      System.out.println("Please enter your username and password. \n");
+      System.out.println("---------------------------------------- \n");
         try{
-        System.out.print("Email: ");
+        System.out.print("User: ");
         usernameInput = in.readLine();
 
-        //System.out.print("Password: ");
       
         char[] inputs = System.console().readPassword("Password:");
-            passwordInput = String.valueOf(inputs);
+         passwordInput = String.valueOf(inputs);
 
-            
-       
+         String query = String.format("SELECT * FROM USERS WHERE name='%s' AND password = '%s' ",usernameInput,passwordInput );
+        
+     
+        List<List<String>> results = esql.executeQueryAndReturnResult(query);
+
+         // we found a User!
+        if(results.size() > 0){
+
+           int userId = Integer.parseInt(results.get(0).get(0));
+           String name = results.get(0).get(1);
+           String usertype = results.get(0).get(3).trim();
+           authenticatedUser.SetInfo(userId,name,usertype);
+        }
+         
         }
         catch(Exception e){
             System.out.println("SOMETHING IS WRONG!");
         }
-     
-      return authenticatedUser;
    }//end
 
 // Rest of the functions definition go in here
 
-   public static void viewHotels(Hotel esql) {}
-   public static void viewRooms(Hotel esql) {}
-   public static void bookRooms(Hotel esql) {}
+   public static void viewHotels(Hotel esql) {} //mine
+
+   public static void viewRooms(Hotel esql) {}//mine
+
+   public static void bookRooms(Hotel esql) {}//mine
+
    public static void viewRecentBookingsfromCustomer(Hotel esql) {}
-   public static void updateRoomInfo(Hotel esql) {}
+   public static void updateRoomInfo(Hotel esql) {} //mine
    public static void viewRecentUpdates(Hotel esql) {}
    public static void viewBookingHistoryofHotel(Hotel esql) {}
    public static void viewRegularCustomers(Hotel esql) {}
    public static void placeRoomRepairRequests(Hotel esql) {}
    public static void viewRoomRepairHistory(Hotel esql) {}
 
-   public static void TestFunction(Hotel esql){
-
-   }
 
 }//end Hotel
 
