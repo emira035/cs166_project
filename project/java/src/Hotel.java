@@ -269,7 +269,7 @@ public class Hotel {
             // These are sample SQL statements
             System.out.println("MAIN MENU");
             System.out.println("---------");
-            System.out.println("1. New User Registration!!");
+            System.out.println("1. New User Registration!!!");
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
             AuthorizedUser authorisedUser = null;
