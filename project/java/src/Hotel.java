@@ -10,7 +10,6 @@
  *
  */
 
-import java.io*;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -30,6 +29,10 @@ import java.lang.Math;
  * work with PostgreSQL JDBC drivers.
  *
  */
+
+
+
+
 public class Hotel {
 
    // reference to physical database connection.
@@ -266,10 +269,10 @@ public class Hotel {
             // These are sample SQL statements
             System.out.println("MAIN MENU");
             System.out.println("---------");
-            System.out.println("1. New User Registration!");
+            System.out.println("1. New User Registration!!");
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
-            String authorisedUser = null;
+            AuthorizedUser authorisedUser = null;
             switch (readChoice()){
                case 1: CreateUser(esql); break;
                case 2: authorisedUser = LogIn(esql); break;
@@ -375,21 +378,30 @@ public class Hotel {
     * Check log in credentials for an existing user
     * @return User login or null is the user does not exist
     **/
-   public static String LogIn(Hotel esql){
+   public static AuthorizedUser LogIn(Hotel esql){
       
-      String usernameInput;
-      String passwordInput;
-      Console cnsl;
+      String usernameInput"";
+      String passwordInput="";
+      AuthorizedUser authenticatedUser = null;
+
       System.out.println("Please enter your username and password. \n \n");
+        try{
+        System.out.print("Email: ");
+        usernameInput = in.readLine();
 
-      System.out.print("USERNAME: ");
-       usernameInput = in.readLine();
-
-      //System.out.print("Password: ");
+        //System.out.print("Password: ");
       
-      char [] ch =cnsl.readPassword("Password: ");
+        char[] inputs = System.console().readPassword("Password:");
+            passwordInput = String.valueOf(inputs);
+
+            
+       
+        }
+        catch(Exception e){
+            System.out.println("SOMETHING IS WRONG!");
+        }
      
-      return s;
+      return authenticatedUser;
    }//end
 
 // Rest of the functions definition go in here
