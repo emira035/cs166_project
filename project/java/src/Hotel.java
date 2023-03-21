@@ -326,7 +326,7 @@ public class AuthorizedUser{
             System.out.println("---------");
             System.out.println("1. New User Registration!");
             System.out.println("2. Log in");
-            System.out.println("9. < EXIT");
+            System.out.println("9. < EXIT\n");
 
             switch (readChoice()){
                case 1: CreateNewCustomer(esql); break;
@@ -482,9 +482,7 @@ public class AuthorizedUser{
       String usernameInput;
       String passwordInput;
       String passwordInput2;
-      boolean nosspaces = false;
-      boolean iscorrectsize = false;
-      boolean matchingpass= false;
+      boolean keeptrying = true;
 
       System.out.println("   New User Registration ");
       System.out.println("---------------------------------------- \n");
@@ -493,7 +491,9 @@ public class AuthorizedUser{
       System.out.println(" - Password must not contain any spaces\n");
       System.out.println("---------------------------------------- \n");
 
+while (keeptrying){
       try{
+
       System.out.print("Username: ");
       usernameInput = in.readLine();
 
@@ -504,32 +504,67 @@ public class AuthorizedUser{
       char[] inputs2 = System.console().readPassword("Confirm Password: ");
       passwordInput2 = String.valueOf(inputs2);
 
-      if(!passwordInput2.equals(passwordInput)){
-           System.out.println("\n- 'Password' and 'Confirm Password' are not same! -");
-           matchingpass = false;
+      //valid candidate for becoming a user, now we need to check if the user already exists!
+      if(ValidatePassword(passwordInput,passwordInput2)){
+         
+         String query = String.format("SELECT * FROM USERS WHERE name='%s' ",usernameInput);
+          int userNum = esql.executeQuery(query);
+         
+         //user already exists
+         if(userNum > 0){
+            keeptrying = true;
+              System.out.println("\n A user with that name already exists! \n");
+         }
+         // we can go ahead and create the user
+         else{
+              keeptrying =false;
+               String createQuery = String.format("INSERT INTO Users (name,password,userType) VALUES('%s','%s','%s')",usernameInput,passwordInput,"customer");
+               esql.executeUpdate(createQuery);
+               System.out.println(" User sucessfully created with userId= "+ esql.getNewUserID("SELECT last_value FROM users_userID_seq") + " and Name = "+usernameInput);
+               return;
+             }
       }
+         System.out.println("\n1. Try again.");
+         System.out.println("2. < Back to Main Menu \n\n");
 
-       if(passwordInput.contains(" ")){
-           System.out.println("\n- Password must not contain Spaces! -");
-           nosspaces =  false;
-      }
+         int choice = readChoice();
 
-
-      if((passwordInput.length()<=5) || (passwordInput.length() >20)){
-           System.out.println("\n- Password must be between 5 and 20 characters!  -");
-          iscorrectsize = false;
-      }
-
-       boolean validpass = matchingpass&&nosspaces&&iscorrectsize;
-
-
+            switch(choice){
+            case 1: keeptrying = true; break;
+            case 2: keeptrying= false; break;
+            default: keeptrying = false; break;
+            }
+          
+      
 
       }
 
       catch(Exception e){
-         System.out.println("SOMETHING IS WRONG!");
+        System.out.println(e.getMessage());
       }
+   }
    }//end CreateUser
+
+
+   public static boolean ValidatePassword(String pass,String confirmpass){
+
+      boolean validpass = true;
+      if(!pass.equals(confirmpass)){
+           System.out.println("\n- 'Password' and 'Confirm Password' are not same! -");
+          validpass = false;
+      }
+
+       if(pass.contains(" ")){
+           System.out.println("\n- Password must not contain Spaces! -");
+           validpass = false;
+      }
+
+      if((pass.length()<5) || (pass.length() >20)){
+           System.out.println("\n- Password must be between 5 and 20 characters!  -");
+          validpass = false;
+      }
+         return validpass;
+   }
 
    /*
     * Check log in credentials for an existing user
@@ -573,13 +608,38 @@ public class AuthorizedUser{
          
         }
         catch(Exception e){
-            System.out.println("SOMETHING IS WRONG!");
+            System.out.println(e.getMessage());
         }
    }//end
 
 // Rest of the functions definition go in here
 
-   public static void viewHotels(Hotel esql) {} //mine
+   public static void viewHotels(Hotel esql) {
+      
+      System.out.println("\n---------------------------------\n");
+      System.out.println("BROWSE HOTELS");
+      System.out.println("\n---------------------------------\n");
+
+      System.out.println("\nPlease input the following information.\n\n");
+
+      try
+      {
+         
+         System.out.print("Hotel ID: ");
+         String hotelId = in.readLine();
+         System.out.print("DATE: ");
+          String Date = in.readLine();
+
+          //LiST<List<String>>
+      }
+      catch(Exception e){
+         System.out.println(e.getMessage());
+      }
+
+
+
+
+   } 
 
    public static void viewRooms(Hotel esql) {}//mine
 
