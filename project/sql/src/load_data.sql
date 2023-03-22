@@ -3,7 +3,7 @@ COPY Users
 <<<<<<< HEAD
 FROM '/extra/emira035/cs166_project/project/data/users.csv'
 =======
-FROM '/extra/achau020/Phase3_Project/project/data/users.csv' 
+FROM '/extra/emira035/Phase3_Project/project/data/users.csv' 
 >>>>>>> 317b909bce8423cb57574f002cc7e9ded6ef66d9
 WITH DELIMITER ',' CSV HEADER;
 ALTER SEQUENCE users_userID_seq RESTART 101; 
