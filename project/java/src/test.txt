@@ -1,0 +1,36 @@
+My test: 4, 7, 8, 9, 10
+
+//String test1 = String.format("SELECT PG_GET_SERIAL_SEQUENCE('RoomRepair', 'repairID')");
+                  //esql.executeUpdate(test1);
+                  
+                  // String test2 = String.format("SELECT CURRVAL(PG_GET_SERIAL_SEQUENCE('RoomRepair', 'repairID')) AS 'Current Value', MAX('repairID') AS 'Max Value' FROM 'RoomRepair'");
+                  // esql.executeUpdate(test2);
+
+                  // String test3 = String.format("SELECT SETVAL((SELECT PG_GET_SERIAL_SEQUENCE('RoomRepair', 'repairID')), (SELECT (MAX('repairID') + 1) FROM 'RoomRepair'), FALSE)");
+                  // esql.executeUpdate(test3);
+
+SELECT u.name, COUNT(u.name) 
+FROM Users as u, RoomBookings as b 
+WHERE b.customerID = u.userID AND b.hotelID = '%s' 
+GROUP BY u.name 
+ORDER BY COUNT(u.name) DESC LIMIT 520     
+
+
+SELECT b.hotelID, b.roomNumber, r.price, b.bookingDate 
+FROM Rooms as r, RoomBookings as b 
+WHERE b.hotelID = r.hotelID AND b.roomNumber = r.roomNumber 
+AND b.customerID = '%s' 
+ORDER BY b.* DESC LIMIT 5", getUserID());         
+
+
+SELECT r.companyID, r.hotelID, r.roomNumber, r.repairDate 
+FROM RoomRepairs as r, RoomRepairRequests as h 
+WHERE h.managerID = '%s' AND r.repairID = h.repairID        
+
+         
+SELECT r.companyID, r.hotelID, r.room_Number, r.repairDate
+FROM RoomRepairs as r, RoomRepairRequests as rp, Hotel as h
+WHERE r.repairID = h.repairID
+AND h.managerUserID = '%d' AND h.hotelID = r.hotelID
+
+[rp.managerID = '%d'] 
