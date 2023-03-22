@@ -852,7 +852,17 @@ while (keeptrying){
 
    //mine
 }
-   public static void viewRecentBookingsfromCustomer(Hotel esql) {}
+   public static void viewRecentBookingsfromCustomer(Hotel esql) {
+       try{
+         //Gets the customer information from UserID
+         String query = String.format("SELECT b.hotelID, b.roomNumber, r.price, b.bookingDate FROM Rooms as r, RoomBookings as b WHERE b.hotelID = r.hotelID AND b.roomNumber = r.roomNumber AND b.customerID = '%s' ORDER BY b.* DESC LIMIT 5", authenticatedUser.getUserID());         
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+         System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
 
 
    public static void updateRoomInfo(Hotel esql) {
@@ -1069,10 +1079,243 @@ while (keeptrying){
 
    }
    public static void viewRecentUpdates(Hotel esql) {}
-   public static void viewBookingHistoryofHotel(Hotel esql) {}
-   public static void viewRegularCustomers(Hotel esql) {}
-   public static void placeRoomRepairRequests(Hotel esql) {}
-   public static void viewRoomRepairHistory(Hotel esql) {}
+   public static void viewBookingHistoryofHotel(Hotel esql) {
+
+      //Variables to keep track if user wants to enter a date range or not
+      boolean dateRange = false;
+      boolean noDateRange = false;
+      try{
+         //Variables to hold the 2 date inputs
+         String firstDate = null;
+         String secondDate = null;
+         //An option to check if user enters 2 same date i.e. 2/12/2015-2/12/2015
+         boolean sameDate = false;
+         String query = "";
+         String yesCheck = "Yes";
+         String yCheck = "Y";
+         String noCheck = "No";
+         String nCheck = "N";
+
+         //This can be move to where it checks where it is a manager before getting date inputs
+         System.out.print("Do you want to enter date ranges?\n Enter Yes or No: ");
+         String dateCheck = in.readLine();
+
+         //This calls the global function to get UserID and stores it
+         //Need this function in order to determine if it is a customer or manager 
+         String exampleQuery = String.format("SELECT UserType FROM Users WHERE userID = '%s'", authenticatedUser.getUserID());
+         List<List<String>> tempQuery = esql.executeQueryAndReturnResult(exampleQuery);
+         String tempString = tempQuery.get(0).get(0).trim();
+
+         if(tempString.equals("manager")) {
+            //This check if user says yes to enter 2 dates: Yes/Y
+            if(yesCheck.equalsIgnoreCase(dateCheck) || yCheck.equalsIgnoreCase(dateCheck)) {
+               dateRange = true;
+               System.out.print("Date range accepted\n");
+
+               //This checks if user says no: No/n
+            } else if (noCheck.equalsIgnoreCase(dateCheck) || nCheck.equalsIgnoreCase(dateCheck)) {
+               noDateRange = true;
+               System.out.print("No range needed\n");
+            } else {
+               //If user enters invalid select then it will not ask for date input
+               //Such as Hello, 123, etc
+               System.out.print("There is an error with date input\n");
+            }
+
+            //This checks if user wants to enter 2 valid date 
+            if(dateRange == true && noDateRange == false) {
+
+               System.out.print("\tEnter Begin Date (MM/DD/YYYY): ");
+               SimpleDateFormat dateFormat = new SimpleDateFormat("mm/dd/yyyy");
+               Date startDob = dateFormat.parse(in.readLine());
+               firstDate = dateFormat.format(startDob);
+
+               System.out.print("\tEnter End Date (MM/DD/YYYY): ");
+               Date lastDob = dateFormat.parse(in.readLine());
+               secondDate = dateFormat.format(lastDob);
+
+               //This checks if user enter an incorrect date
+               //such as last date before the first which does not make sense
+               //i.e. 2/12/2015 - 1/10/2012
+               if(firstDate.compareTo(secondDate) > 0) {
+                  System.out.println("Last Date cannot be before the first date");
+               }
+
+               //Checks if they enter the same date 
+               if(firstDate.compareTo(secondDate) == 0) {
+                  sameDate = true;
+               }
+            }
+
+            //if user does not want to enter any date ranges
+            if(noDateRange == true) {
+               System.out.print("No date range required\n");
+               //grab all booking information that is manage by the manager
+               query = String.format("SELECT DISTINCT b.bookingID, b.customerID, u.name, b.hotelID, b.roomNumber, b.bookingDate FROM RoomBookings as b, Users as u, Hotel as h WHERE h.managerUserID = '%s' AND b.hotelID = h.hotelID AND b.customerID = u.userID", authenticatedUser.getUserID());         
+            } else {
+               //checks if user enter 2 valid dates or 2 same date
+               //EX: 2/12/2015 - 3/4/2019 or 2/12/2015 - 2/12/2015
+               if(sameDate == false) {
+                  query = String.format("SELECT DISTINCT b.bookingID, b.customerID, u.name, b.hotelID, b.roomNumber, b.bookingDate FROM RoomBookings as b, Users as u, Hotel as h WHERE h.managerUserID = '%s' AND b.hotelID = h.hotelID AND b.customerID = u.userID AND (b.bookingDate BETWEEN '%s' AND '%s')", authenticatedUser.getUserID(), firstDate, secondDate);         
+               } else {
+                  query = String.format("SELECT DISTINCT b.bookingID, b.customerID, u.name, b.hotelID, b.roomNumber, b.bookingDate FROM RoomBookings as b, Users as u, Hotel as h WHERE h.managerUserID = '%s' AND b.hotelID = h.hotelID AND b.customerID = u.userID AND b.bookingDate = '%s'", authenticatedUser.getUserID(), firstDate);         
+               }
+            }
+
+            int rowCount = esql.executeQueryAndPrintResult(query);
+            System.out.println ("total row(s): " + rowCount);
+      } else {
+         System.out.print("You are not a manager\n");
+      }
+
+      }catch(Exception e){
+         //System.err.println (e.getMessage() + "?");
+         if(dateRange == false) {
+            System.out.print("");
+         } else {
+            //To avoid printing out error message for equalsIgnoreCase
+            System.err.println (e.getMessage() + "!");
+         }
+      }
+
+   }
+   public static void viewRegularCustomers(Hotel esql) {
+      try{
+            //Get UserID
+            String exampleQuery = String.format("SELECT UserType FROM Users WHERE userID = '%s'", authenticatedUser.getUserID());
+            List<List<String>> tempQuery = esql.executeQueryAndReturnResult(exampleQuery);
+            String tempString = tempQuery.get(0).get(0).trim();
+            
+            if(tempString.equals("manager")) {
+
+               System.out.print("\tEnter Hotel ID: ");
+               Integer hotelID = Integer.parseInt(in.readLine());
+               //need to check if hotelID belong to that manager
+               String checkHotelID = String.format("SELECT hotelID FROM Hotel as h WHERE h.managerUserID = '%s' AND h.hotelID = '%d'", authenticatedUser.getUserID(), hotelID);
+               int userRow = esql.executeQuery(checkHotelID);
+
+               //if the hotelID belongs to the manager
+               if(userRow > 0) {
+
+                  //Check regular customer from hotelID 
+                  String query = String.format("SELECT u.name, COUNT(u.name) FROM Users as u, RoomBookings as b WHERE b.customerID = u.userID AND b.hotelID = '%s' GROUP BY u.name ORDER BY COUNT(u.name) DESC LIMIT 5", hotelID);         
+                  int rowCount = esql.executeQueryAndPrintResult(query);
+                  System.out.println ("total row(s): " + rowCount);
+               } else {
+                  System.out.print("Hote does not belong to you\n");
+               }
+            } else {
+               System.out.print("You are not a manager\n");
+            }
+
+         }catch(Exception e){
+            System.err.println (e.getMessage());
+         }
+   }
+   public static void placeRoomRepairRequests(Hotel esql) {
+
+      try{
+         String exampleQuery = String.format("SELECT UserType FROM Users WHERE userID = '%s'", authenticatedUser.getUserID());
+         List<List<String>> tempQuery = esql.executeQueryAndReturnResult(exampleQuery);
+         String tempString = tempQuery.get(0).get(0).trim();
+                  
+         if(tempString.equals("manager")) {
+            System.out.print("\tEnter Hotel ID: ");
+            Integer hotelID = Integer.parseInt(in.readLine());
+
+            //need to check if hotelID belong to that manager
+            String checkHotelID = String.format("SELECT hotelID FROM Hotel as h WHERE h.managerUserID = '%s' AND h.hotelID = '%d'", authenticatedUser.getUserID(), hotelID);
+            int userRow = esql.executeQuery(checkHotelID);
+
+            //if the hotelID belongs to the manager
+            if(userRow > 0) {
+               System.out.print("\tEnter Room Number: ");
+               Integer roomNumber = Integer.parseInt(in.readLine());
+
+               System.out.print("\tEnter Company ID: ");
+               Integer companyID = Integer.parseInt(in.readLine());
+
+               SimpleDateFormat dateFormat = new SimpleDateFormat("mm/dd/yyyy");
+               Date date = new Date();
+               String currDate = dateFormat.format(date);            
+               String curr2DateQuery = String.format("SELECT CURRENT_DATE");
+
+               List<List<String>> tempQuery2 = esql.executeQueryAndReturnResult(curr2DateQuery);
+               String tempString2 = tempQuery2.get(0).get(0).trim();
+
+               System.out.print("Curr: " + tempString2 + "\n");
+
+               //counts the amount of queries/data located in roomRepair
+               //This helps with knowing the amount of queriest created
+               String lastQuery = String.format("SELECT * FROM RoomRepairs");
+               Integer queryAmount = esql.executeQuery(lastQuery);
+               
+               /*
+                  This checks if there is an existing data from the given inputs
+                  So why did I not use NOT IN, NOT EXISTS, DELETE the data
+                  Notes:
+                  There was error when inserting due to duplicate key value violates unique constraint pkey
+                  There was an error when DELETING as there was no way to alter exist(delete) because of
+                     duplicate key value violates unique constraint foreign key
+               */
+               String deleteQuery = String.format("SELECT * FROM RoomRepairs WHERE repairID = '%d' AND companyID = '%d' AND hotelID = '%d' AND roomNumber = '%d' AND repairDate = '%s'",queryAmount, companyID, hotelID, roomNumber, tempQuery2);
+               Integer amount = esql.executeQuery(deleteQuery);
+               //System.out.println ("total row(s) for repair queries: " + amount);
+
+               //This checks if there is NO existing data by checking if there a  result
+               if(amount == 0) {
+                  
+                  //after passing all checks, begin adding the data
+                  String repairQuery = String.format("INSERT INTO RoomRepairs (repairID, companyID, hotelID, roomNumber, repairDate) VALUES ('%d','%d', '%d', '%d', '%s')", queryAmount+1, companyID, hotelID, roomNumber, tempString2);
+                  esql.executeUpdate(repairQuery);
+                  
+                  //System.out.print("Queries 1 Done: " + queryAmount + "\n");
+                  
+                  String roomRequestQuery = String.format("INSERT INTO RoomRepairRequests (requestNumber, managerID, repairID) VALUES ('%d','%s', '%d')", queryAmount+1, authenticatedUser.getUserID(), queryAmount+1);
+                  esql.executeUpdate(roomRequestQuery);
+
+                  //System.out.print("Queries 2 Done: " + queryAmount + "\n");
+
+                  int rowCount = esql.executeQueryAndPrintResult(repairQuery);
+                  System.out.println ("total row(s) for room repair: " + rowCount);
+                  rowCount = esql.executeQueryAndPrintResult(roomRequestQuery);
+                  System.out.println ("total row(s) for repair request: " + rowCount);
+               } else {
+                  System.out.print("This row already exist\n");
+               }
+            } else {
+               System.out.print("Hotel does not belong to you\n");
+            }
+         } else {
+            System.out.print("You are not a manager\n");
+         }
+
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+
+
+   }
+   public static void viewRoomRepairHistory(Hotel esql) {
+       try{
+         String exampleQuery = String.format("SELECT UserType FROM Users WHERE userID = '%s'",authenticatedUser.getUserID());
+         List<List<String>> tempQuery = esql.executeQueryAndReturnResult(exampleQuery);
+         String tempString = tempQuery.get(0).get(0).trim();
+         
+         if(tempString.equals("manager")) {
+            //String query = String.format("SELECT r.companyID, r.hotelID, r.roomNumber, r.repairDate FROM RoomRepairs as r, RoomRepairRequests as h WHERE h.managerID = '%s' AND r.repairID = h.repairID", getUserID());         
+            String query = String.format("SELECT r.* FROM RoomRepairs as r, RoomRepairRequests as h WHERE h.managerID = '%s' AND r.repairID = h.repairID", authenticatedUser.getUserID());         
+
+            int rowCount = esql.executeQueryAndPrintResult(query);
+            System.out.println ("total row(s): " + rowCount);
+         } else {
+            System.out.print("You are not a manager\n");
+         }
+
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+}
 
 
 }//end Hotel
