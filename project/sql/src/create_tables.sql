@@ -92,3 +92,6 @@ RETURNS decimal AS $dist$
 BEGIN RETURN sqrt((lat1 - lat2) * (lat1 - lat2) + (long1 - long2) * (long1 - long2));
 END;
 $dist$ LANGUAGE plpgsql;
+
+
+

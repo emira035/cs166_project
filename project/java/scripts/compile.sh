@@ -10,4 +10,3 @@ javac -d $DIR/../classes $DIR/../src/Hotel.java
 #run the java program
 #Use your database name, port number and login
 java -cp $DIR/../classes:$DIR/../lib/pg73jdbc3.jar Hotel $USER"_DB" $PGPORT $USER
-
