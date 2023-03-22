@@ -914,7 +914,7 @@ while (keeptrying){
       String ManagerQuery = String.format("SELECT * FROM rooms r WHERE r.roomNumber='%s' AND r.hotelID IN (SELECT h.hotelID FROM hotel h WHERE h.managerUserID='%s' AND h.hotelID='%s')",roomNumber,managerID,hotelId);
      
      if(authenticatedUser.getUserType().equals("admin")){
-            results = esql.executeQueryAndcdReturnResult(AdminQuery);
+            results = esql.executeQueryAndReturnResult(AdminQuery);
      }
      else{
             results = esql.executeQueryAndReturnResult(ManagerQuery);
