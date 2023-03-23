@@ -1,4 +1,3 @@
-
 COPY Users
 FROM '/extra/emira035/cs166_project/project/data/users.csv'
 WITH DELIMITER ',' CSV HEADER;
